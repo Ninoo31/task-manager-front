@@ -1,12 +1,15 @@
 import React, { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+    const navigate = useNavigate();
     const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token") || null)
     const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refresh_token") || null)
     const [user, setUser] = useState(null);
 
+    // Function to get a new access_token
     const refreshAccessToken = async () => {
         if (!refreshToken) return
 
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }) => {
             if (response.ok) {
                 const data = await response.json();
                 setUser(data);
+                navigate("/dashboard")
             } else if (response.status === 401) {
                 await refreshAccessToken(); // Refresh token if expired
             }
@@ -56,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        navigate("/login")
     };
 
     useEffect(() => {
@@ -63,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     }, [accessToken]);
 
     return (
-        <AuthContext.Provider value={{ accessToken, user, refreshAccessToken, logout }}>
+        <AuthContext.Provider value={{ accessToken, setAccessToken, refreshToken, setRefreshToken, user, refreshAccessToken, fetchUserProfile, logout  }}>
             {children}
         </AuthContext.Provider>
     );

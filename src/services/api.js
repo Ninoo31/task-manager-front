@@ -3,8 +3,8 @@ import { useContext } from "react";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-export async function fetchWithAuth(endpoint, option={}) {
-    const { accessToken, refreshAcessToken, logout } = useContext(AuthContext);
+export async function fetchWithAuth(endpoint, options={}) {
+    const { accessToken, refreshAccessToken, logout } = useContext(AuthContext);
 
     if (!accessToken) {
         console.error("No access token found, redirecting to login...");
@@ -13,7 +13,6 @@ export async function fetchWithAuth(endpoint, option={}) {
     }
 
     options.headers = {
-        ...options.headers,
         "Authorization": `Bearer ${accessToken}`
     };
 
@@ -21,7 +20,7 @@ export async function fetchWithAuth(endpoint, option={}) {
 
     if (response.status === 401 ) { // Token expired
         console.log("Access token expired, refreshing...")
-        await refreshAcessToken();
+        await refreshAccessToken();
 
         options.headers["Authorization"] = `Bearer ${localStorage.getItem("access_token")}`;
         response = await fetch(`${API_URL}${endpoint}`, options)
