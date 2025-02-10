@@ -1,11 +1,13 @@
 import React, {useState, useContext } from "react"
 import AuthContext from "../context/AuthContext"
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-    const { setAccessToken, setRefreshToken, fetchUserProfile } = useContext(AuthContext);
+    const { accessToken, setAccessToken, setRefreshToken, fetchUserProfile } = useContext(AuthContext);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
 
     const handleLogin = async (e) => {
@@ -23,11 +25,15 @@ const Login = () => {
             console.log("🔍 Réponse de l'API :", data);
 
             if (response.ok) {
-                setAccessToken(data.access_token)
+                const accessToken = data.access_token
+                setAccessToken(accessToken)
                 setRefreshToken(data.refresh_token)
-                localStorage.setItem("access_token", data.access_token)
+                localStorage.setItem("access_token", accessToken)
                 localStorage.setItem("refresh_token", data.refresh_token)
-                fetchUserProfile();
+                
+                await fetchUserProfile(accessToken);
+
+                navigate("/dashboard")
             } else {
                 setError(data.error || "Login failed. Please try again");
             }
