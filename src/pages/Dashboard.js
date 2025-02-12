@@ -1,28 +1,33 @@
 import React, { useEffect, useState, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { fetchUserTasks } from "../api/api";
+import { fetchUserTasks } from "../api/tasks";
 
 const perPage = 10 // Should be dynamic
 
 const Dashboard = () => {
-    const { user, accessToken } = useContext(AuthContext)
+    const { user, accessToken , refreshToken, setAccessToken, logout} = useContext(AuthContext)
     const [tasks, setTasks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(accessToken){
-            loadTasks();
-        }
-    }, [currentPage, accessToken]);
+        const loadTasks = async () => {
+            if(accessToken){
+                const data = await fetchUserTasks(accessToken, refreshToken, setAccessToken, logout, currentPage, perPage);
+                if (data) {
+                    setTasks(data.tasks);
+                    setTotalPages(Math.ceil(data.total_tasks / perPage))
+                } else {
+                    setTasks([])
+                }
+            }
+        };
 
-    const loadTasks = async () => {
-        const data = await fetchUserTasks(currentPage, perPage);
-        setTasks(data.tasks);
-        setTotalPages(Math.ceil(data.total_tasks / perPage))
-    };
+        loadTasks();
+    }, [user, currentPage, accessToken, refreshToken, setAccessToken, logout]);
+
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -60,7 +65,7 @@ const Dashboard = () => {
                     onClick={() => setCurrentPage(currentPage - 1)}
                     className="px-4 py-2 bg-gray-300 rounded mx-2"
                 >
-                    ⬅️ Précédent
+                    ⬅️ Previous
                 </button>
                 <span>Page {currentPage} / {totalPages}</span>
                 <button
@@ -68,7 +73,7 @@ const Dashboard = () => {
                     onClick={() => setCurrentPage(currentPage + 1)}
                     className="px-4 py-2 bg-gray-300 rounded mx-2"
                 >
-                    Suivant ➡️
+                    Next ➡️
                 </button>
             </div>
         </div>

@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL;
+import AuthProvider from '../context/AuthContext'
 
 export async function fetchWithAuth(endpoint, options={}, accessToken, refreshToken, setAccessToken, logout) {
     if (!accessToken) {
@@ -15,7 +15,7 @@ export async function fetchWithAuth(endpoint, options={}, accessToken, refreshTo
         "Authorization": `Bearer ${accessToken}`
     };
 
-    let response = await fetch(`${API_URL}${endpoint}`, options);
+    let response = await fetch(`${endpoint}`, options);
 
     if (response.status === 401 ) { // Token expired
         console.log("Access token expired, refreshing...")
@@ -26,7 +26,7 @@ export async function fetchWithAuth(endpoint, options={}, accessToken, refreshTo
         }
 
         options.headers["Authorization"] = `Bearer ${accessToken}`;
-        response = await fetch(`${API_URL}${endpoint}`, options)
+        response = await fetch(`${endpoint}`, options)
     }
 
     return response.json();
@@ -36,7 +36,7 @@ export async function fetchWithAuth(endpoint, options={}, accessToken, refreshTo
 export async function refreshAccessToken(refreshToken, setAccessToken, logout) {
     if (!refreshToken) {
         logout();
-        return;
+        return
     }
 
     try {

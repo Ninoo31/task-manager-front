@@ -1,23 +1,25 @@
 import React, { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { refreshAccessToken } from "../services/api";
-import { fetchUserProfile } from "../api/api";
+import { fetchUserProfile } from "../api/users";
+
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
+
     const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token") || null)
     const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refresh_token") || null)
     const [user, setUser] = useState(null);
 
     useEffect(() => {
         if (accessToken) {
-            fetchUserProfile(accessToken, setUser);
+            fetchUserProfile(accessToken).then((user) => setUser(user));
         } else if (refreshToken) {
             refreshAccessToken(refreshToken, setAccessToken, logout).then((newToken) => {
                 if (newToken) {
-                    fetchUserProfile(newToken, setUser);
+                    fetchUserProfile(newToken).then((user) => setUser(user))
                 }
             });
         }

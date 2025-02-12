@@ -1,9 +1,10 @@
 import React, {useState, useContext } from "react"
 import AuthContext from "../context/AuthContext"
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"
+import { loginUser } from "../api/users";
 
 const Login = () => {
-    const { accessToken, setAccessToken, setRefreshToken, fetchUserProfile } = useContext(AuthContext);
+    const { setAccessToken, setRefreshToken, fetchUserProfile } = useContext(AuthContext);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -15,30 +16,14 @@ const Login = () => {
         setError("");
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/users/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password }),
+            // Pass all dependencies into the loginUser function
+            await loginUser(username, password, {
+                setAccessToken,
+                setRefreshToken,
+                fetchUserProfile,
+                navigate,
             });
-
-            const data = await response.json();
-            console.log("🔍 Réponse de l'API :", data);
-
-            if (response.ok) {
-                const accessToken = data.access_token
-                setAccessToken(accessToken)
-                setRefreshToken(data.refresh_token)
-                localStorage.setItem("access_token", accessToken)
-                localStorage.setItem("refresh_token", data.refresh_token)
-                
-                await fetchUserProfile(accessToken);
-
-                navigate("/dashboard")
-            } else {
-                setError(data.error || "Login failed. Please try again");
-            }
         } catch (error) {
-            console.error("❌ Erreur lors du login :", error);
             setError(error.message || "An error occurred. Please try again.");
         }
     };
@@ -76,6 +61,17 @@ const Login = () => {
                         Login
                     </button>
                 </form>
+            </div>
+            <div>
+                <p>
+                    Don't have an account?{" "}
+                    <span
+                        onClick={() => navigate("/register")}
+                        className="text-blue-500 cursor-pointer hover:underline"
+                    >
+                        Register here
+                    </span>
+                </p>
             </div>
         </div>
     );
