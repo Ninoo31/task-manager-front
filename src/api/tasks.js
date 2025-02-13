@@ -12,3 +12,28 @@ export async function fetchUserTasks(accessToken, refreshToken, setAccessToken, 
 
     return fetchWithAuth(url.toString(), {}, accessToken, refreshToken, setAccessToken, logout);
 }
+
+export async function createTask(accessToken, taskData) {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/tasks`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(taskData),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (!response.ok) {
+            throw new Error(data || "Failed to create task.");
+        }
+
+        return data; // Return the created task
+    } catch (error) {
+        console.error("Error creating task:", error);
+        throw error;
+    }
+}
