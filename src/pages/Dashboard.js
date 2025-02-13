@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import TaskModal from "../components/TaskModal";
-import { useNavigate } from "react-router-dom";
-import { fetchUserTasks, createTask } from "../api/tasks";
+import TaskDetailsModal from "../components/TaskDetailsModal";
+import { fetchUserTasks, createTask, updateTask, deleteTask } from "../api/tasks";
 
 const perPage = 10 // Should be dynamic
 
@@ -12,7 +12,8 @@ const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const navigate = useNavigate();
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
 
     useEffect(() => {
         const loadTasks = async () => {
@@ -39,6 +40,31 @@ const Dashboard = () => {
         }
     };
 
+    const handleUpdateTask = async (updatedTask) => {
+        try {
+            const updated = await updateTask(accessToken, updatedTask);
+            setTasks((prevTasks) =>
+                prevTasks.map((task) => (task.id === updated.id ? updated : task))
+            );
+        } catch (error) {
+            console.error("Error updating task:", error);
+        }
+    };
+
+    const handleDeleteTask = async (taskId) => {
+        try {
+            await deleteTask(accessToken, taskId);
+            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+        } catch (error) {
+            console.error("Error deleting task:", error);
+        }
+    };
+
+    const openDetailsModal = (task) => {
+        setSelectedTask(task);
+        setIsDetailsModalOpen(true);
+    };
+
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -62,13 +88,24 @@ const Dashboard = () => {
                 onCreate={handleCreateTask}
             />
 
+            {selectedTask && (
+                <TaskDetailsModal
+                    isOpen={isDetailsModalOpen}
+                    task={selectedTask}
+                    onClose={() => setIsDetailsModalOpen(false)}
+                    onUpdate={handleUpdateTask}
+                    onDelete={handleDeleteTask}
+                />
+            )}
+
             {/* Task List */}
             <ul className="border rounded p-4 bg-white shadow">
                 {tasks.length === 0 ? (
                     <p className="text-gray-500">Nothing Today.</p>
                 ) : (
                     tasks.map((task) => (
-                        <li key={task.id} className="p-2 border-b flex justify-between">
+                        <li key={task.id} className="p-2 border-b flex justify-between cursor-pointer border rounded-lg focus:outline-none focus:ring hover:bg-blue-200" 
+                            onClick={() => openDetailsModal(task)}>
                             <span>{task.title}</span>
                             <span className="text-sm text-gray-600">{task.status}</span>
                         </li>
@@ -77,23 +114,25 @@ const Dashboard = () => {
             </ul>
 
             {/* Pagination */}
-            <div className="mt-4 flex justify-center">
-                <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    className="px-4 py-2 bg-gray-300 rounded mx-2"
-                >
-                    ⬅️ Previous
-                </button>
-                <span>Page {currentPage} / {totalPages}</span>
-                <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    className="px-4 py-2 bg-gray-300 rounded mx-2"
-                >
-                    Next ➡️
-                </button>
-            </div>
+            {totalPages > 0 && (
+                <div className="mt-4 flex justify-center">
+                    <button
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        className="px-4 py-2 bg-gray-300 rounded mx-2"
+                    >
+                        ⬅️ Previous
+                    </button>
+                    <span>Page {currentPage} / {totalPages}</span>
+                    <button
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        className="px-4 py-2 bg-gray-300 rounded mx-2"
+                    >
+                        Next ➡️
+                    </button>
+                </div> )
+            }
         </div>
     );
 };
