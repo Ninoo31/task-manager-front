@@ -14,7 +14,7 @@ pipeline {
         AWS_REGION = 'us-east-1'
         ECR_URI = '600627340377.dkr.ecr.eu-north-1.amazonaws.com'
         ECR_REPO = 'task_manager_front'
-        IMAGE_TAG = GIT_COMMIT
+        IMAGE_TAG = "$GIT_COMMIT"
         REPORTS_DIR = 'reports'
     }
 
@@ -98,25 +98,34 @@ pipeline {
 
         stage('Push Image to AWS ECR') {
             steps {
-                wit
-                sh '''
-                    aws ecr get-login-password --region ${AWS_REGION} |
-                        docker login --username AWS --password-stdin ${ECR_REGISTRY}
-                    docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-                '''
+                withAWS(credentials: 'aws-credentials', region: 'eu-north-1') {
+                    sh '''
+                        aws ecr get-login-password --region ${AWS_REGION} |
+                            docker login --username AWS --password-stdin ${ECR_URI}
+                        docker push ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}
+                    '''
+                }
             }
         }
 
         stage('Deploy to EC2') {
             steps {
-                sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@your-ec2-ip << 'EOF'
-                    docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-                    docker stop task-manager-front || true
-                    docker rm task-manager-front || true
-                    docker run -d --name task-manager-front -p 80:80 ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
-                    EOF
-                '''
+                script {
+                    sshagent(['aws-dev-deploy-ec2-ecR']) {
+                        sh '''
+                            ssh -o StrictHostKeyChecking=no ubuntu@your-ec2-ip "
+                            if sudo docker ps -a | grep -q "task-manager-front"; then
+                                echo "Container found. Stopping..."
+                                sudo docker stop "task-manager-front" && sudo docker rm "task-manager-front"
+                                echo "Container stopped and removed."
+                            fi
+                            docker stop task-manager-front || true
+                            docker rm task-manager-front || true
+                            docker run -d --name task-manager-front -p 80:80 ${ECR_URI}/${ECR_REPO}:${IMAGE_TAG}
+                            "
+                        '''
+                    }
+                }
             }
         }
     }
