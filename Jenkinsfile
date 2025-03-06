@@ -29,7 +29,7 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ${REPORTS_DIR}
-                npm test -- --html --outputFile=${REPORTS_DIR}/test-results.html
+                npm test
                 '''
             }
         }
