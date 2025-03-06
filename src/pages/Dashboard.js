@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import TaskModal from "../components/TaskModal";
 import TaskDetailsModal from "../components/TaskDetailsModal";
@@ -33,7 +33,7 @@ const Dashboard = () => {
 
     const handleCreateTask = async (taskData) => {
         try {
-            const data = await createTask(accessToken, taskData); // API call to create a task
+            await createTask(accessToken, taskData); // API call to create a task
             setTasks((prevTasks) => [...prevTasks, taskData]); // Add the new task to the existing list
         } catch (error) {
             console.error("Error creating task:", error);

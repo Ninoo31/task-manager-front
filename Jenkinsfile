@@ -29,14 +29,14 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p ${REPORTS_DIR}
-                npm test -- --json --outputFile=${REPORTS_DIR}/test-results.json
+                npm test -- --html --outputFile=${REPORTS_DIR}/test-results.html
                 '''
             }
         }
 
         stage('Audit Dependencies') {
             steps {
-                sh "npm audit --json > ${REPORTS_DIR}/audit-report.json || true"
+                sh "npm audit --html > ${REPORTS_DIR}/audit-report.html || true"
             }
         }
 
@@ -147,7 +147,7 @@ pipeline {
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: REPORTS_DIR,
-                reportFiles: 'test-results.json',
+                reportFiles: 'test-results.html',
                 reportName: 'Test Report'
             ])
             publishHTML([
@@ -155,7 +155,7 @@ pipeline {
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
                 reportDir: REPORTS_DIR,
-                reportFiles: 'audit-report.json',
+                reportFiles: 'audit-report.html',
                 reportName: 'Dependency Audit Report'
             ])
             publishHTML([
@@ -163,7 +163,7 @@ pipeline {
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
                         reportDir: REPORTS_DIR,
-                        reportFiles: 'trivy-report.json',
+                        reportFiles: 'trivy-report.html',
                         reportName: 'Trivy Security Report'
                     ])
         }

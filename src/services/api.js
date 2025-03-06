@@ -1,5 +1,3 @@
-import AuthProvider from '../context/AuthContext'
-
 export async function fetchWithAuth(endpoint, options={}, accessToken, refreshToken, setAccessToken, logout) {
     if (!accessToken) {
         console.error("No access token found, trying to refresh...");
