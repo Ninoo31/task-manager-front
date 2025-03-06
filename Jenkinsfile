@@ -36,7 +36,7 @@ pipeline {
 
         stage('Audit Dependencies') {
             steps {
-                sh "npm audit --html > ${REPORTS_DIR}/audit-report.html || true"
+                sh "npm audit --audit-level=critical --html > ${REPORTS_DIR}/audit-CRITICAL-report.html || true"
             }
         }
 
