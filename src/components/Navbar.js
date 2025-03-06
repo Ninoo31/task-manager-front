@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import { useAuthContext } from "../context/AuthContext";
+
 
 const Navbar = () => {
-    const { user, logout } = useContext(AuthContext);
+    const { user, logout } = useAuthContext;
     const navigate = useNavigate();
 
     return (

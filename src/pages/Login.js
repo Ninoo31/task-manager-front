@@ -1,10 +1,10 @@
 import React, {useState, useContext } from "react"
-import AuthContext from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 import { loginUser } from "../api/users";
+import { useAuthContext } from "../context/AuthContext";
 
 const Login = () => {
-    const { setAccessToken, setRefreshToken, fetchUserProfile } = useContext(AuthContext);
+    const { setAccessToken, setRefreshToken, fetchUserProfile } = useAuthContext(); 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");

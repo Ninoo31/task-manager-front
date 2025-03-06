@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import AuthContext from "../context/AuthContext";
+import { useAuthContext } from "../context/AuthContext";
 import TaskModal from "../components/TaskModal";
 import TaskDetailsModal from "../components/TaskDetailsModal";
 import { fetchUserTasks, createTask, updateTask, deleteTask } from "../api/tasks";
@@ -7,7 +7,7 @@ import { fetchUserTasks, createTask, updateTask, deleteTask } from "../api/tasks
 const perPage = 10 // Should be dynamic
 
 const Dashboard = () => {
-    const { user, accessToken , refreshToken, setAccessToken, logout} = useContext(AuthContext)
+    const { user, accessToken , refreshToken, setAccessToken, logout} = useAuthContext();
     const [tasks, setTasks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
