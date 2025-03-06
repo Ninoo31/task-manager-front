@@ -27,7 +27,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh "npm test -- --json --outputFile=${REPORTS_DIR}/test-results.json"
+                sh '''
+                mkdir -p ${REPORTS_DIR}
+                npm test -- --json --outputFile=${REPORTS_DIR}/test-results.json
+                '''
             }
         }
 
